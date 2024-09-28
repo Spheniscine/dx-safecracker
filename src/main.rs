@@ -3,6 +3,8 @@
 use dioxus::prelude::*;
 use dioxus_logger::tracing::{info, Level};
 use rand::{rngs::ThreadRng, Rng};
+mod consts;
+use consts::*;
 
 fn main() {
     // Init logger
@@ -14,44 +16,46 @@ fn main() {
 }
 
 #[component]
+fn NewGameOptions() -> Element {
+    rsx! {
+        form {
+            onsubmit: move |event| { 
+                let data = event.data.values();
+                info!("Submitted! {data:?}") 
+            },
+            p {
+                "Number of digits: ",
+                select {
+                    name: "digits",
+                    for i in MIN_DIGITS ..= MAX_DIGITS {
+                        option { {i.to_string()} }
+                    }
+                }
+            }
+            p {
+                "Range of digits: ",
+                select {
+                    name: "range",
+                    option { "1-6" }
+                    option { "1-4" }
+                    option { "1-9" }
+                }
+            }
+            p {
+                input {
+                    r#type: "submit",
+                    "Start game"
+                }
+            }
+        }
+    }
+}
+
+#[component]
 fn App() -> Element {
     // Build cool things ✌️
 
-    let rn = ThreadRng::default().gen_range(0..100000);
-
     rsx! {
-        // link { rel: "stylesheet", href: "main.css" }
-        // img { src: "header.svg", id: "header" }
-        // div { id: "links",
-        //     a { target: "_blank", href: "https://dioxuslabs.com/learn/0.5/", "📚 Learn Dioxus" }
-        //     a { target: "_blank", href: "https://dioxuslabs.com/awesome", "🚀 Awesome Dioxus" }
-        //     a { target: "_blank", href: "https://github.com/dioxus-community/", "📡 Community Libraries" }
-        //     a { target: "_blank", href: "https://github.com/DioxusLabs/dioxus-std", "⚙️ Dioxus Standard Library" }
-        //     a { target: "_blank", href: "https://marketplace.visualstudio.com/items?itemName=DioxusLabs.dioxus", "💫 VSCode Extension" }
-        //     a { target: "_blank", href: "https://discord.gg/XgGxMSkvUM", "👋 Community Discord" }
-        // }
-
-        div {
-            "Random number: {rn}",
-        }
-
-        button { 
-            onclick: move |_| {
-                eval(r#"document.getElementById("sampleDialog").showModal();"#);
-            },
-            id: "openDialog", 
-            "Open Dialog" 
-        }
-        dialog {
-            id: "sampleDialog",
-            p { "hello" }
-            button { 
-                onclick: move |_| {
-                    eval(r#"document.getElementById("sampleDialog").close();"#);
-                },
-                id: "closeDialog", 
-                "Close"
-            }
-        }
+        NewGameOptions {}
     }
 }
