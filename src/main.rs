@@ -15,14 +15,16 @@ fn main() {
     
 }
 
+fn test_event(event: Event<FormData>) {
+    let data = event.data.values();
+    info!("Submitted! {data:?}") 
+}
+
 #[component]
 fn NewGameOptions() -> Element {
     rsx! {
         form {
-            onsubmit: move |event| { 
-                let data = event.data.values();
-                info!("Submitted! {data:?}") 
-            },
+            onsubmit: test_event,
             p {
                 "Number of digits: ",
                 select {
@@ -36,9 +38,9 @@ fn NewGameOptions() -> Element {
                 "Range of digits: ",
                 select {
                     name: "range",
-                    option { "1-6" }
-                    option { "1-4" }
-                    option { "1-9" }
+                    for &(k, _) in RANGES {
+                        option { {k} }
+                    }
                 }
             }
             p {
