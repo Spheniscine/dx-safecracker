@@ -1,6 +1,6 @@
 #![allow(non_snake_case)]
 
-use std::ops::{Deref, RangeInclusive};
+use std::{fmt::{Display, Debug}, ops::{Deref, RangeInclusive}};
 
 use dioxus::prelude::*;
 use dioxus_logger::tracing::{info, Level};
@@ -17,7 +17,23 @@ fn main() {
     
 }
 
-type Code = Vec<u8>;
+#[derive(Clone)]
+struct Code(Vec<u8>);
+
+impl Display for Code {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        for v in &self.0 {
+            write!(f, "{}", v)?;
+        }
+        Ok(())
+    }
+}
+
+impl Debug for Code {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        Display::fmt(&self, f)
+    }
+}
 
 #[derive(Debug, Clone)]
 struct GameState {
@@ -29,7 +45,7 @@ struct GameState {
 
 fn random_code(digits: usize, range: RangeInclusive<u8>) -> Code {
     let mut rng = ThreadRng::default();
-    (0..digits).map(|_| rng.gen_range(range.clone())).collect()
+    Code((0..digits).map(|_| rng.gen_range(range.clone())).collect())
 }
 
 impl GameState {
