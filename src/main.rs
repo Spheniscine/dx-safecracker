@@ -1,12 +1,12 @@
 #![allow(non_snake_case)]
 
-use std::{fmt::{Display, Debug}, ops::{Deref, RangeInclusive}};
 
 use dioxus::prelude::*;
 use dioxus_logger::tracing::{info, Level};
-use rand::{rngs::ThreadRng, Rng};
 mod consts;
 use consts::*;
+mod gamestate;
+use gamestate::*;
 
 fn main() {
     // Init logger
@@ -15,48 +15,6 @@ fn main() {
     launch(App);
 
     
-}
-
-#[derive(Clone)]
-struct Code(Vec<u8>);
-
-impl Display for Code {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        for v in &self.0 {
-            write!(f, "{}", v)?;
-        }
-        Ok(())
-    }
-}
-
-impl Debug for Code {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        Display::fmt(&self, f)
-    }
-}
-
-#[derive(Debug, Clone)]
-struct GameState {
-    digits: usize,
-    range: RangeInclusive<u8>,
-    secret: Code,
-    spin: Code
-}
-
-fn random_code(digits: usize, range: RangeInclusive<u8>) -> Code {
-    let mut rng = ThreadRng::default();
-    Code((0..digits).map(|_| rng.gen_range(range.clone())).collect())
-}
-
-impl GameState {
-    fn new(digits: usize, range: RangeInclusive<u8>) -> Self {
-        Self {
-            digits,
-            range: range.clone(),
-            secret: random_code(digits, range.clone()),
-            spin: random_code(digits, range.clone()),
-        }
-    }
 }
 
 #[component]
