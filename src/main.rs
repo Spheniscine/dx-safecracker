@@ -18,7 +18,40 @@ fn main() {
 }
 
 #[component]
-fn NewGameOptions() -> Element {
+fn NewGameOptions(onsubmit: EventHandler<FormEvent>) -> Element {
+    rsx! {
+        form {
+            onsubmit: move |event| onsubmit.call(event),
+            p {
+                "Number of digits: ",
+                select {
+                    name: "digits",
+                    for i in MIN_DIGITS ..= MAX_DIGITS {
+                        option { {i.to_string()} }
+                    }
+                }
+            }
+            p {
+                "Range of digits: ",
+                select {
+                    name: "range",
+                    for &(k, _) in RANGES {
+                        option { {k} }
+                    }
+                }
+            }
+            p {
+                input {
+                    r#type: "submit",
+                    "Start game"
+                }
+            }
+        }
+    }
+}
+
+#[component]
+fn App() -> Element {
     let mut game_state = use_signal(|| None);
     let start_game = |event: Event<FormData>, game_state: &mut Signal<Option<GameState>>| {
         let values = event.data.values();
@@ -28,49 +61,15 @@ fn NewGameOptions() -> Element {
         game_state.set(Some(GameState::new(digits, range)));
     };
 
-
     rsx! {
         if let Some(state) = game_state() {
             p {
                 {format!("{:?}", state)}
             }
         } else {
-            form {
-                onsubmit: move |event| start_game(event, &mut game_state),
-                p {
-                    "Number of digits: ",
-                    select {
-                        name: "digits",
-                        for i in MIN_DIGITS ..= MAX_DIGITS {
-                            option { {i.to_string()} }
-                        }
-                    }
-                }
-                p {
-                    "Range of digits: ",
-                    select {
-                        name: "range",
-                        for &(k, _) in RANGES {
-                            option { {k} }
-                        }
-                    }
-                }
-                p {
-                    input {
-                        r#type: "submit",
-                        "Start game"
-                    }
-                }
+            NewGameOptions {
+                onsubmit: move |event| start_game(event, &mut game_state)
             }
         }
-    }
-}
-
-#[component]
-fn App() -> Element {
-    // Build cool things ✌️
-
-    rsx! {
-        NewGameOptions {}
     }
 }
