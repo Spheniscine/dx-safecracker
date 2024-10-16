@@ -30,10 +30,12 @@ impl Code {
 
 #[derive(Debug, Clone)]
 pub struct GameState {
-    digits: usize,
-    range: RangeInclusive<u8>,
-    secret: Code,
-    spin: Code
+    pub digits: usize,
+    pub range: RangeInclusive<u8>,
+    pub secret: Code,
+    pub spin: Code,
+    pub spins: i32,
+    pub history: Vec<Code>,
 }
 
 impl GameState {
@@ -43,6 +45,14 @@ impl GameState {
             range: range.clone(),
             secret: Code::random(digits, range.clone()),
             spin: Code::random(digits, range.clone()),
+            spins: 0,
+            history: vec![],
         }
+    }
+    pub fn code_value(&self, code: &Code) -> i32 {
+        code.0.iter().zip(&self.secret.0).map(|(&a, &b)| if a == b {a as i32} else {0}).sum()
+    }
+    pub fn current_value(&self) -> i32 {
+        self.code_value(&self.spin)
     }
 }

@@ -52,7 +52,7 @@ fn NewGameOptions(onsubmit: EventHandler<FormEvent>) -> Element {
 
 #[component]
 fn App() -> Element {
-    let mut game_state = use_signal(|| None);
+    let mut game_state: Signal<Option<GameState>> = use_signal(|| None);
     let start_game = |event: Event<FormData>, game_state: &mut Signal<Option<GameState>>| {
         let values = event.data.values();
         let digits = values.get("digits").unwrap().as_value().parse::<usize>().unwrap_or(0).clamp(MIN_DIGITS, MAX_DIGITS);
@@ -65,6 +65,21 @@ fn App() -> Element {
         if let Some(state) = game_state() {
             p {
                 {format!("{:?}", state)}
+            }
+            p {
+                "You spin the dial; it lands on this candidate code:"
+            }
+            h1 {
+                {state.spin.to_string()}
+            }
+            if state.current_value() == 0 {
+                p {
+                    "Its value is 0. You get a free guess! What is the secret code?"
+                }
+            } else {
+                p {
+                    "What is its value (sum of digits that match the secret code both in number and position)?"
+                }
             }
         } else {
             NewGameOptions {
