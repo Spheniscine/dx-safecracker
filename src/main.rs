@@ -76,9 +76,37 @@ fn App() -> Element {
                 p {
                     "Its value is 0. You get a free guess! What is the secret code?"
                 }
+                p {
+                    form {
+                        p {
+                            input {
+                                r#type: "text",
+                                name: "guess"
+                            }
+                            input {
+                                r#type: "submit",
+                                "Submit"
+                            }
+                        }
+                    }
+                }
             } else {
                 p {
                     "What is its value (sum of digits that match the secret code both in number and position)?"
+                }
+                p {
+                    form {
+                        p {
+                            input {
+                                r#type: "text",
+                                name: "guess"
+                            }
+                            input {
+                                r#type: "submit",
+                                "Submit"
+                            }
+                        }
+                    }
                 }
             }
         } else {
