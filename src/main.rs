@@ -72,25 +72,7 @@ fn App() -> Element {
             h1 {
                 {state.spin.to_string()}
             }
-            if state.current_value() == 0 {
-                p {
-                    "Its value is 0. You get a free guess! What is the secret code?"
-                }
-                p {
-                    form {
-                        p {
-                            input {
-                                r#type: "text",
-                                name: "guess"
-                            }
-                            input {
-                                r#type: "submit",
-                                "Submit"
-                            }
-                        }
-                    }
-                }
-            } else {
+            if state.state_kind == StateKind::GuessValue {
                 p {
                     "What is its value (sum of digits that match the secret code both in number and position)?"
                 }
@@ -107,6 +89,34 @@ fn App() -> Element {
                             }
                         }
                     }
+                }
+            } else if state.state_kind == StateKind::GuessCode {
+                if state.current_value() == 0 {
+                    p {
+                        "Its value is 0. You get a free guess! What is the secret code?"
+                    }
+                } else {
+                    p {
+                        "Correct! You may now guess the secret code."
+                    }
+                }
+                p {
+                    form {
+                        p {
+                            input {
+                                r#type: "text",
+                                name: "guess"
+                            }
+                            input {
+                                r#type: "submit",
+                                "Submit"
+                            }
+                        }
+                    }
+                }
+            } else if state.state_kind == StateKind::Won {
+                p {
+                    "You won! (TODO)"
                 }
             }
         } else {

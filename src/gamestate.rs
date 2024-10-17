@@ -36,17 +36,31 @@ pub struct GameState {
     pub spin: Code,
     pub spins: i32,
     pub history: Vec<Code>,
+    pub state_kind: StateKind,
 }
 
 impl GameState {
     pub fn new(digits: usize, range: RangeInclusive<u8>) -> Self {
-        Self {
+        let secret = Code::random(digits, range.clone());
+        let mut r = Self {
             digits,
             range: range.clone(),
-            secret: Code::random(digits, range.clone()),
-            spin: Code::random(digits, range.clone()),
+            secret,
+            spin: Code(vec![]),
             spins: 0,
             history: vec![],
+            state_kind: StateKind::GuessValue
+        };
+        r.spin();
+        r
+    }
+    pub fn spin(&mut self) {
+        self.spin = Code::random(self.digits, self.range.clone());
+        if self.current_value() == 0 {
+            self.history.push(self.spin.clone());
+            self.state_kind = StateKind::GuessCode;
+        } else {
+            self.state_kind = StateKind::GuessValue;
         }
     }
     pub fn code_value(&self, code: &Code) -> i32 {
@@ -55,4 +69,9 @@ impl GameState {
     pub fn current_value(&self) -> i32 {
         self.code_value(&self.spin)
     }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum StateKind {
+    GuessValue, GuessCode, Won
 }
