@@ -60,6 +60,15 @@ fn App() -> Element {
         let range = RANGES.iter().find(|r| r.0 == range).unwrap_or(&RANGES[0]).1.clone();
         game_state.set(Some(GameState::new(digits, range)));
     };
+    let guess_value = |event: Event<FormData>, game_state: &mut Signal<Option<GameState>>| {
+        let values = event.data.values();
+        let value = values.get("guess").unwrap().as_value();
+        if let Ok(value) = value.parse::<i32>() {
+            let mut state = game_state.unwrap();
+            state.guess_value(value);
+            game_state.set(Some(state));
+        }
+    };
 
     rsx! {
         if let Some(state) = game_state() {
@@ -78,6 +87,7 @@ fn App() -> Element {
                 }
                 p {
                     form {
+                        onsubmit: move |event| guess_value(event, &mut game_state),
                         p {
                             input {
                                 r#type: "text",
@@ -113,6 +123,10 @@ fn App() -> Element {
                             }
                         }
                     }
+                }
+            } else if state.state_kind == StateKind::IncorrectValue {
+                p {
+                    "Incorrect value (TODO)"
                 }
             } else if state.state_kind == StateKind::Won {
                 p {

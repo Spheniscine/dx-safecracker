@@ -1,5 +1,6 @@
 use std::{fmt::{Debug, Display}, ops::RangeInclusive};
 
+use dioxus_logger::tracing::info;
 use rand::{rngs::ThreadRng, Rng};
 
 
@@ -55,6 +56,7 @@ impl GameState {
         r
     }
     pub fn spin(&mut self) {
+        self.spins += 1;
         self.spin = Code::random(self.digits, self.range.clone());
         if self.current_value() == 0 {
             self.history.push(self.spin.clone());
@@ -69,9 +71,19 @@ impl GameState {
     pub fn current_value(&self) -> i32 {
         self.code_value(&self.spin)
     }
+    pub fn guess_value(&mut self, value: i32) {
+        if self.state_kind == StateKind::GuessValue {
+            info!("{}", self.current_value());
+            if self.current_value() == value {
+                self.state_kind = StateKind::GuessCode;
+            } else {
+                self.state_kind = StateKind::IncorrectValue;
+            }
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum StateKind {
-    GuessValue, GuessCode, Won
+    GuessValue, GuessCode, IncorrectValue, Won
 }
