@@ -69,6 +69,11 @@ fn App() -> Element {
             game_state.set(Some(state));
         }
     };
+    let do_spin = |_event: Event<FormData>, game_state: &mut Signal<Option<GameState>>| {
+        let mut state = game_state.unwrap();
+        state.spin();
+        game_state.set(Some(state));
+    };
 
     rsx! {
         if let Some(state) = game_state() {
@@ -85,18 +90,16 @@ fn App() -> Element {
                 p {
                     "What is its value (sum of digits that match the secret code both in number and position)?"
                 }
-                p {
-                    form {
-                        onsubmit: move |event| guess_value(event, &mut game_state),
-                        p {
-                            input {
-                                r#type: "text",
-                                name: "guess"
-                            }
-                            input {
-                                r#type: "submit",
-                                "Submit"
-                            }
+                form {
+                    onsubmit: move |event| guess_value(event, &mut game_state),
+                    p {
+                        input {
+                            r#type: "text",
+                            name: "guess"
+                        }
+                        input {
+                            r#type: "submit",
+                            "Submit"
                         }
                     }
                 }
@@ -110,23 +113,31 @@ fn App() -> Element {
                         "Correct! You may now guess the secret code."
                     }
                 }
-                p {
-                    form {
-                        p {
-                            input {
-                                r#type: "text",
-                                name: "guess"
-                            }
-                            input {
-                                r#type: "submit",
-                                "Submit"
-                            }
+                form {
+                    // TODO
+                    p {
+                        input {
+                            r#type: "text",
+                            name: "guess"
+                        }
+                        input {
+                            r#type: "submit",
+                            "Submit"
                         }
                     }
                 }
             } else if state.state_kind == StateKind::IncorrectValue {
                 p {
-                    "Incorrect value (TODO)"
+                    "Incorrect. The value is {state.current_value().to_string()}.", 
+                }
+                form {
+                    onsubmit: move |event| do_spin(event, &mut game_state),
+                    p {
+                        button {
+                            r#type: "submit",
+                            "Spin"
+                        }
+                    }
                 }
             } else if state.state_kind == StateKind::Won {
                 p {

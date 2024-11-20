@@ -73,10 +73,10 @@ impl GameState {
     }
     pub fn guess_value(&mut self, value: i32) {
         if self.state_kind == StateKind::GuessValue {
-            info!("{}", self.current_value());
             if self.current_value() == value {
                 self.state_kind = StateKind::GuessCode;
             } else {
+                self.history.push(self.spin.clone());
                 self.state_kind = StateKind::IncorrectValue;
             }
         }
