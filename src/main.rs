@@ -73,8 +73,10 @@ fn App() -> Element {
             let mut state = game_state.unwrap();
             if value >= *state.range.end() as i32 * state.digits as i32 {
                 alert("Guessed value is too high.".to_string());
-            } else if value <= 0 {
+            } else if value == 0 {
                 alert("Guessed value cannot be zero.".to_string());
+            } else if value < 0 {
+                alert("Guessed value cannot be negative.".to_string());
             } else {
                 state.guess_value(value);
                 game_state.set(Some(state));
@@ -83,10 +85,38 @@ fn App() -> Element {
             alert("Guessed value must be a number".to_string());
         }
     };
+
+    let mut guess_code = move |event: Event<FormData>, game_state: &mut Signal<Option<GameState>>| {
+        let values = event.data.values();
+        let value = values.get("guess").unwrap().as_value();
+        let mut state = game_state.unwrap();
+
+        let parse = if value.len() != state.digits {None} else {
+            let lo = b'0' + state.range.start();
+            let hi = b'0' + state.range.end();
+            if value.bytes().any(|b| !(lo..=hi).contains(&b)) {
+                None
+            } else {
+                Some(Code(value.bytes().map(|x| x - b'0').collect()))
+            }
+        };
+
+        if let Some(code) = parse {
+            state.guess_code(code);
+            game_state.set(Some(state));
+        } else {
+            alert(format!("Invalid code. The current game allows codes of {} digits between {} and {}, inclusive.", state.digits, state.range.start(), state.range.end()));
+        }
+    };
+
     let do_spin = |_event: Event<FormData>, game_state: &mut Signal<Option<GameState>>| {
         let mut state = game_state.unwrap();
         state.spin();
         game_state.set(Some(state));
+    };
+
+    let restart = |_event: Event<FormData>, game_state: &mut Signal<Option<GameState>>| {
+        game_state.set(None);
     };
 
     rsx! {
@@ -128,7 +158,7 @@ fn App() -> Element {
                     }
                 }
                 form {
-                    // TODO
+                    onsubmit: move |event| guess_code(event, &mut game_state),
                     p {
                         input {
                             r#type: "text",
@@ -153,9 +183,34 @@ fn App() -> Element {
                         }
                     }
                 }
+            } else if state.state_kind == StateKind::IncorrectCode {
+                p {
+                    "Incorrect. The value of your guess is {state.last_code_value().unwrap().to_string()}.", 
+                }
+                form {
+                    onsubmit: move |event| do_spin(event, &mut game_state),
+                    p {
+                        button {
+                            r#type: "submit",
+                            "Spin"
+                        }
+                    }
+                }
             } else if state.state_kind == StateKind::Won {
                 p {
-                    "You won! (TODO)"
+                    "Correct! You win the game!"
+                }
+                p {
+                    "You won the game in {state.spins.to_string()} spin", {if state.spins == 1 {""} else {"s"}}, "."
+                }
+                form {
+                    onsubmit: move |event| restart(event, &mut game_state),
+                    p {
+                        button {
+                            r#type: "submit",
+                            "Play again"
+                        }
+                    }
                 }
             }
         } else {

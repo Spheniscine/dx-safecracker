@@ -5,7 +5,7 @@ use rand::{rngs::ThreadRng, Rng};
 
 
 #[derive(Clone, PartialEq, Eq)]
-pub struct Code(Vec<u8>);
+pub struct Code(pub Vec<u8>);
 
 impl Display for Code {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -67,6 +67,9 @@ impl GameState {
     }
     pub fn code_value(&self, code: &Code) -> i32 {
         code.0.iter().zip(&self.secret.0).map(|(&a, &b)| if a == b {a as i32} else {0}).sum()
+    }
+    pub fn last_code_value(&self) -> Option<i32> {
+        Some(self.code_value(self.history.last()?))
     }
     pub fn current_value(&self) -> i32 {
         self.code_value(&self.spin)
