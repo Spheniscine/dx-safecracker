@@ -4,7 +4,7 @@ use dioxus_logger::tracing::info;
 use rand::{rngs::ThreadRng, Rng};
 
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq, Eq)]
 pub struct Code(Vec<u8>);
 
 impl Display for Code {
@@ -73,11 +73,21 @@ impl GameState {
     }
     pub fn guess_value(&mut self, value: i32) {
         if self.state_kind == StateKind::GuessValue {
+            self.history.push(self.spin.clone());
             if self.current_value() == value {
                 self.state_kind = StateKind::GuessCode;
             } else {
-                self.history.push(self.spin.clone());
                 self.state_kind = StateKind::IncorrectValue;
+            }
+        }
+    }
+    pub fn guess_code(&mut self, code: Code) {
+        if self.state_kind == StateKind::GuessCode {
+            if self.secret == code {
+                self.state_kind = StateKind::Won;
+            } else {
+                self.history.push(code);
+                self.state_kind = StateKind::IncorrectCode;
             }
         }
     }
@@ -85,5 +95,5 @@ impl GameState {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum StateKind {
-    GuessValue, GuessCode, IncorrectValue, Won
+    GuessValue, GuessCode, IncorrectValue, IncorrectCode, Won
 }

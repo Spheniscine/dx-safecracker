@@ -53,6 +53,12 @@ fn NewGameOptions(onsubmit: EventHandler<FormEvent>) -> Element {
 #[component]
 fn App() -> Element {
     let mut game_state: Signal<Option<GameState>> = use_signal(|| None);
+    let mut alert_text = use_signal(|| String::from("Placeholder alert text"));
+    let mut alert = move |msg: String| {
+        alert_text.set(msg);
+        eval(r#"document.getElementById("alertDialog").showModal();"#);
+    };
+
     let start_game = |event: Event<FormData>, game_state: &mut Signal<Option<GameState>>| {
         let values = event.data.values();
         let digits = values.get("digits").unwrap().as_value().parse::<usize>().unwrap_or(0).clamp(MIN_DIGITS, MAX_DIGITS);
@@ -60,13 +66,21 @@ fn App() -> Element {
         let range = RANGES.iter().find(|r| r.0 == range).unwrap_or(&RANGES[0]).1.clone();
         game_state.set(Some(GameState::new(digits, range)));
     };
-    let guess_value = |event: Event<FormData>, game_state: &mut Signal<Option<GameState>>| {
+    let mut guess_value = move |event: Event<FormData>, game_state: &mut Signal<Option<GameState>>| {
         let values = event.data.values();
         let value = values.get("guess").unwrap().as_value();
         if let Ok(value) = value.parse::<i32>() {
             let mut state = game_state.unwrap();
-            state.guess_value(value);
-            game_state.set(Some(state));
+            if value >= *state.range.end() as i32 * state.digits as i32 {
+                alert("Guessed value is too high.".to_string());
+            } else if value <= 0 {
+                alert("Guessed value cannot be zero.".to_string());
+            } else {
+                state.guess_value(value);
+                game_state.set(Some(state));
+            }
+        } else {
+            alert("Guessed value must be a number".to_string());
         }
     };
     let do_spin = |_event: Event<FormData>, game_state: &mut Signal<Option<GameState>>| {
@@ -147,6 +161,17 @@ fn App() -> Element {
         } else {
             NewGameOptions {
                 onsubmit: move |event| start_game(event, &mut game_state)
+            }
+        }
+
+        dialog {
+            id: "alertDialog",
+            p { {alert_text} }
+            button { 
+                onclick: move |_| {
+                    eval(r#"document.getElementById("alertDialog").close();"#);
+                },
+                "OK"
             }
         }
     }
