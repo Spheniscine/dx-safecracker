@@ -143,7 +143,7 @@ fn App() -> Element {
                         onsubmit: move |event| guess_value(event, &mut game_state),
                         p {
                             input {
-                                r#type: "tel",
+                                r#type: "text", inputmode: "numeric",
                                 name: "guess"
                             }
                             input {
@@ -166,7 +166,7 @@ fn App() -> Element {
                         onsubmit: move |event| guess_code(event, &mut game_state),
                         p {
                             input {
-                                r#type: "tel",
+                                r#type: "text", inputmode: "numeric",
                                 name: "guess"
                             }
                             input {
