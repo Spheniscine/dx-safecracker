@@ -122,141 +122,144 @@ fn App() -> Element {
     };
 
     rsx! {
-        if let Some(state) = game_state() {
-            // p {
-            //     //debug
-            //     {format!("{:?}", state)}
-            // }
-            p {
-                "You spin the dial; it lands on this candidate code:"
-            }
-            h1 {
-                {state.spin.to_string()}
-            }
-            if state.state_kind == StateKind::GuessValue {
+        div { font_family: "'Trebuchet MS','Lucida Sans Unicode', 'Lucida Grande', Verdana, Arial, sans-serif",
+            font_size: "12pt",
+            if let Some(state) = game_state() {
+                // p {
+                //     //debug
+                //     {format!("{:?}", state)}
+                // }
                 p {
-                    "What is its value (sum of digits that match the secret code both in number and position)?"
+                    "You spin the dial; it lands on this candidate code:"
                 }
-                form {
-                    onsubmit: move |event| guess_value(event, &mut game_state),
-                    p {
-                        input {
-                            r#type: "text",
-                            name: "guess"
-                        }
-                        input {
-                            r#type: "submit",
-                            "Submit"
-                        }
-                    }
+                h1 {
+                    {state.spin.to_string()}
                 }
-            } else if state.state_kind == StateKind::GuessCode {
-                if state.current_value() == 0 {
+                if state.state_kind == StateKind::GuessValue {
                     p {
-                        "Its value is 0. You get a free guess! What is the secret code?"
+                        "What is its value (sum of digits that match the secret code both in number and position)?"
                     }
-                } else {
-                    p {
-                        "Correct! You may now guess the secret code."
-                    }
-                }
-                form {
-                    onsubmit: move |event| guess_code(event, &mut game_state),
-                    p {
-                        input {
-                            r#type: "text",
-                            name: "guess"
-                        }
-                        input {
-                            r#type: "submit",
-                            "Submit"
+                    form {
+                        onsubmit: move |event| guess_value(event, &mut game_state),
+                        p {
+                            input {
+                                r#type: "text",
+                                name: "guess"
+                            }
+                            input {
+                                r#type: "submit",
+                                "Submit"
+                            }
                         }
                     }
-                }
-            } else if state.state_kind == StateKind::IncorrectValue {
-                p {
-                    "Incorrect. The value is {state.current_value().to_string()}.", 
-                }
-                form {
-                    onsubmit: move |event| do_spin(event, &mut game_state),
-                    p {
-                        button {
-                            r#type: "submit",
-                            "Spin"
+                } else if state.state_kind == StateKind::GuessCode {
+                    if state.current_value() == 0 {
+                        p {
+                            "Its value is 0. You get a free guess! What is the secret code?"
+                        }
+                    } else {
+                        p {
+                            "Correct! You may now guess the secret code."
                         }
                     }
-                }
-            } else if state.state_kind == StateKind::IncorrectCode {
-                p {
-                    "Incorrect. The value of your guess is {state.last_code_value().unwrap().to_string()}.", 
-                }
-                form {
-                    onsubmit: move |event| do_spin(event, &mut game_state),
-                    p {
-                        button {
-                            r#type: "submit",
-                            "Spin"
+                    form {
+                        onsubmit: move |event| guess_code(event, &mut game_state),
+                        p {
+                            input {
+                                r#type: "text",
+                                name: "guess"
+                            }
+                            input {
+                                r#type: "submit",
+                                "Submit"
+                            }
                         }
                     }
-                }
-            } else if state.state_kind == StateKind::Won {
-                p {
-                    "Correct! You win the game!"
-                }
-                p {
-                    "You won the game in {state.spins.to_string()} spin", {if state.spins == 1 {""} else {"s"}}, "."
-                }
-                form {
-                    onsubmit: move |event| restart(event, &mut game_state),
+                } else if state.state_kind == StateKind::IncorrectValue {
                     p {
-                        button {
-                            r#type: "submit",
-                            "Play again"
+                        "Incorrect. The value is {state.current_value().to_string()}.", 
+                    }
+                    form {
+                        onsubmit: move |event| do_spin(event, &mut game_state),
+                        p {
+                            button {
+                                r#type: "submit",
+                                "Spin"
+                            }
                         }
                     }
-                }
-            }
-
-            form {
-                onsubmit: move |_event| show_history.set(!show_history()),
-                p {
-                    button {
-                        r#type: "submit",
-                        if !show_history() {"Show History"} else {"Hide History"}
-                    }
-                }
-            }
-            if show_history() {
-                if state.history.is_empty() { 
+                } else if state.state_kind == StateKind::IncorrectCode {
                     p {
-                        "There are no known values yet."
+                        "Incorrect. The value of your guess is {state.last_code_value().unwrap().to_string()}.", 
                     }
-                } else {
-                    ul {
-                        for code in &state.history {
-                            li {
-                                {code.to_string()},
-                                " → ",
-                                {state.code_value(code).to_string()}
+                    form {
+                        onsubmit: move |event| do_spin(event, &mut game_state),
+                        p {
+                            button {
+                                r#type: "submit",
+                                "Spin"
+                            }
+                        }
+                    }
+                } else if state.state_kind == StateKind::Won {
+                    p {
+                        "Correct! You win the game!"
+                    }
+                    p {
+                        "You won the game in {state.spins.to_string()} spin", {if state.spins == 1 {""} else {"s"}}, "."
+                    }
+                    form {
+                        onsubmit: move |event| restart(event, &mut game_state),
+                        p {
+                            button {
+                                r#type: "submit",
+                                "Play again"
                             }
                         }
                     }
                 }
-            }
-        } else {
-            NewGameOptions {
-                onsubmit: move |event| start_game(event, &mut game_state)
-            }
-        }
 
-        dialog {
-            id: "alertDialog",
-            p { {alert_text} }
-            button { 
-                onclick: move |_| {
-                    eval(r#"document.getElementById("alertDialog").close();"#);
-                },
-                "OK"
+                form {
+                    onsubmit: move |_event| show_history.set(!show_history()),
+                    p {
+                        button {
+                            r#type: "submit",
+                            if !show_history() {"Show History"} else {"Hide History"}
+                        }
+                    }
+                }
+                if show_history() {
+                    if state.history.is_empty() { 
+                        p {
+                            "There are no known values yet."
+                        }
+                    } else {
+                        ul {
+                            for code in &state.history {
+                                li {
+                                    {code.to_string()},
+                                    " → ",
+                                    {state.code_value(code).to_string()}
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                NewGameOptions {
+                    onsubmit: move |event| start_game(event, &mut game_state)
+                }
+            }
+
+            dialog {
+                id: "alertDialog",
+                p { {alert_text} }
+                button { 
+                    onclick: move |_| {
+                        eval(r#"document.getElementById("alertDialog").close();"#);
+                    },
+                    "OK"
+                }
             }
         }
     }
