@@ -121,9 +121,10 @@ fn App() -> Element {
 
     rsx! {
         if let Some(state) = game_state() {
-            p {
-                {format!("{:?}", state)}
-            }
+            // p {
+            //     //debug
+            //     {format!("{:?}", state)}
+            // }
             p {
                 "You spin the dial; it lands on this candidate code:"
             }
