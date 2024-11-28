@@ -59,6 +59,8 @@ fn App() -> Element {
         eval(r#"document.getElementById("alertDialog").showModal();"#);
     };
 
+    let mut show_history: Signal<bool> = use_signal(|| false);
+
     let start_game = |event: Event<FormData>, game_state: &mut Signal<Option<GameState>>| {
         let values = event.data.values();
         let digits = values.get("digits").unwrap().as_value().parse::<usize>().unwrap_or(0).clamp(MIN_DIGITS, MAX_DIGITS);
@@ -210,6 +212,33 @@ fn App() -> Element {
                         button {
                             r#type: "submit",
                             "Play again"
+                        }
+                    }
+                }
+            }
+
+            form {
+                onsubmit: move |_event| show_history.set(!show_history()),
+                p {
+                    button {
+                        r#type: "submit",
+                        if !show_history() {"Show History"} else {"Hide History"}
+                    }
+                }
+            }
+            if show_history() {
+                if state.history.is_empty() { 
+                    p {
+                        "There are no known values yet."
+                    }
+                } else {
+                    ul {
+                        for code in &state.history {
+                            li {
+                                {code.to_string()},
+                                " → ",
+                                {state.code_value(code).to_string()}
+                            }
                         }
                     }
                 }
