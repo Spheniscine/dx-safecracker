@@ -76,7 +76,7 @@ fn App() -> Element {
         let mut state = game_state.unwrap();
         let parse = match value.parse::<i32>() {
             Ok(value) => {
-                if value >= *state.range.end() as i32 * state.digits as i32 {
+                if value > *state.range.end() as i32 * state.digits as i32 {
                     Err(IntErrorKind::PosOverflow)
                 } else if value == 0 {
                     Err(IntErrorKind::Zero)
