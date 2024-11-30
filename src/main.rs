@@ -1,6 +1,8 @@
 #![allow(non_snake_case)]
 
 
+use std::num::IntErrorKind;
+
 use dioxus::prelude::*;
 use dioxus_logger::tracing::{info, Level};
 mod consts;
@@ -71,20 +73,37 @@ fn App() -> Element {
     let mut guess_value = move |event: Event<FormData>, game_state: &mut Signal<Option<GameState>>| {
         let values = event.data.values();
         let value = values.get("guess").unwrap().as_value();
-        if let Ok(value) = value.parse::<i32>() {
-            let mut state = game_state.unwrap();
-            if value >= *state.range.end() as i32 * state.digits as i32 {
-                alert("Guessed value is too high.".to_string());
-            } else if value == 0 {
-                alert("Guessed value cannot be zero.".to_string());
-            } else if value < 0 {
-                alert("Guessed value cannot be negative.".to_string());
-            } else {
+        let mut state = game_state.unwrap();
+        let parse = match value.parse::<i32>() {
+            Ok(value) => {
+                if value >= *state.range.end() as i32 * state.digits as i32 {
+                    Err(IntErrorKind::PosOverflow)
+                } else if value == 0 {
+                    Err(IntErrorKind::Zero)
+                } else if value < 0 {
+                    Err(IntErrorKind::NegOverflow)
+                } else {
+                    Ok(value)
+                }
+            }
+            Err(err) => Err(err.kind().clone()),
+        };
+
+        match parse {
+            Ok(value) => {
                 state.guess_value(value);
                 game_state.set(Some(state));
             }
-        } else {
-            alert("Guessed value must be a number".to_string());
+            Err(error) => {
+                let msg = match error {
+                    IntErrorKind::InvalidDigit => {"Guessed value must be a number."},
+                    IntErrorKind::PosOverflow => {"Guessed value is too high."},
+                    IntErrorKind::NegOverflow => {"Guessed value cannot be negative."},
+                    IntErrorKind::Zero => {"Guessed value cannot be zero."},
+                    _ => {"Please enter a number."},
+                };
+                alert(msg.to_string());
+            }
         }
     };
 
