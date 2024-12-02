@@ -73,6 +73,7 @@ fn App() -> Element {
     let mut guess_value = move |event: Event<FormData>, game_state: &mut Signal<Option<GameState>>| {
         let values = event.data.values();
         let value = values.get("guess").unwrap().as_value();
+        let value = value.trim();
         let mut state = game_state.unwrap();
         let parse = match value.parse::<i32>() {
             Ok(value) => {
@@ -110,6 +111,7 @@ fn App() -> Element {
     let mut guess_code = move |event: Event<FormData>, game_state: &mut Signal<Option<GameState>>| {
         let values = event.data.values();
         let value = values.get("guess").unwrap().as_value();
+        let value = value.trim();
         let mut state = game_state.unwrap();
 
         let parse = if value.len() != state.digits {None} else {
