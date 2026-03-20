@@ -1,5 +1,10 @@
 # Safecracker
 
+Game based on "Summer Math Camp" by Grant Fikes
+
+Link: [https://spheniscine.github.io/dx-safecracker/] <br>
+Or here (ad-supported) [https://www.interactive.onlinemathlearning.com/fun_safecracker.php]
+
 ## Objective
 
 A secret code is set from the parameters you chose. (For a harder game, try more digits and/or a different range of digits; the '1-4' option may be harder than you think!). Try to break this secret code in as few guesses as possible.
